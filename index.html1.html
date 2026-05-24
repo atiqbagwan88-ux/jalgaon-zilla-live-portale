@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Jalgaon Zilla Namaz</title>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial;
+background:#071a12;
+color:white;
+}
+
+header{
+background:#198754;
+padding:15px;
+text-align:center;
+font-size:24px;
+font-weight:bold;
+}
+
+/* LOGIN */
+
+#loginPage{
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
+
+.loginBox{
+background:#0f2f22;
+padding:25px;
+border-radius:12px;
+width:320px;
+text-align:center;
+box-shadow:0 0 15px rgba(0,255,100,0.3);
+}
+
+.loginBox h2{
+color:#00ff99;
+}
+
+input{
+width:90%;
+padding:12px;
+margin:10px 0;
+border:none;
+border-radius:8px;
+font-size:16px;
+}
+
+button{
+width:100%;
+padding:12px;
+background:#00ff99;
+border:none;
+border-radius:8px;
+font-size:16px;
+font-weight:bold;
+cursor:pointer;
+}
+
+/* WEBSITE */
+
+#mainWebsite{
+display:none;
+}
+
+.userInfo{
+text-align:center;
+padding:10px;
+background:#0f2f22;
+}
+
+.liveClock{
+font-size:22px;
+color:#00ff99;
+margin-top:10px;
+font-weight:bold;
+}
+
+.liveStatus{
+font-size:18px;
+color:#00ff99;
+margin-top:8px;
+}
+
+.searchBox{
+text-align:center;
+margin-top:15px;
+}
+
+.card{
+background:#0f2f22;
+margin:15px;
+padding:15px;
+border-radius:12px;
+box-shadow:0 0 10px rgba(0,255,100,0.3);
+}
+
+.card h2{
+color:#00ff99;
+}
+
+footer{
+text-align:center;
+padding:15px;
+background:#198754;
+margin-top:20px;
+}
+
+a{
+color:#00ff99;
+text-decoration:none;
+font-weight:bold;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- LOGIN PAGE -->
+
+<div id="loginPage">
+
+<div class="loginBox">
+
+<h2>Mobile Login</h2>
+
+<input
+type="text"
+id="name"
+placeholder="Enter Your Name">
+
+<input
+type="number"
+id="mobile"
+placeholder="Enter Mobile Number">
+
+<button onclick="login()">
+Login Now
+</button>
+
+<p id="msg"></p>
+
+</div>
+
+</div>
+
+<!-- WEBSITE -->
+
+<div id="mainWebsite">
+
+<header>
+🌙 Jalgaon Zilla Namaz Portal
+</header>
+
+<div class="userInfo">
+
+<h3 id="welcome"></h3>
+
+<div class="liveClock">
+🕒 <span id="clock"></span>
+</div>
+
+<div class="liveStatus">
+<span id="namazStatus"></span>
+</div>
+
+</div>
+
+<!-- SEARCH -->
+
+<div class="searchBox">
+
+<input
+id="search"
+placeholder="Search Masjid..."
+onkeyup="searchMasjid()">
+
+</div>
+
+<!-- MASJID LIST -->
+
+<div id="list"></div>
+
+<footer>
+
+Created By Atiq Bagwan
+
+</footer>
+
+</div>
+
+<!-- AZAN AUDIO -->
+
+<audio id="azanAudio">
+
+<source
+src="azan.mp3"
+type="audio/mpeg">
+
+</audio>
+
+<script>
+
+/* LOGIN */
+
+function login(){
+
+let name =
+document.getElementById("name").value;
+
+let mobile =
+document.getElementById("mobile").value;
+
+if(name.trim()==="" || mobile.trim()===""){
+
+document.getElementById("msg")
+.innerHTML =
+"❌ Fill All Details";
+
+return;
+
+}
+
+if(mobile.length < 10){
+
+document.getElementById("msg")
+.innerHTML =
+"❌ Enter Valid Mobile Number";
+
+return;
+
+}
+
+/* SHOW WEBSITE */
+
+document.getElementById("loginPage")
+.style.display = "none";
+
+document.getElementById("mainWebsite")
+.style.display = "block";
+
+document.getElementById("welcome")
+.innerHTML =
+"👋 Welcome " + name;
+
+/* NOTIFICATION */
+
+showNotification(name);
+
+loadMasjids();
+
+}
+
+/* MOBILE NOTIFICATION */
+
+function showNotification(name){
+
+if(Notification.permission === "granted"){
+
+new Notification(
+
+"🕌 Jalgaon Zilla Namaz",
+
+{
+body:
+"Welcome " + name +
+" | Prayer Time Notifications Enabled"
+}
+
+);
+
+}
+else if(Notification.permission !== "denied"){
+
+Notification.requestPermission()
+.then(permission=>{
+
+if(permission === "granted"){
+
+new Notification(
+
+"🕌 Jalgaon Zilla Namaz",
+
+{
+body:
+"Welcome " + name +
+" | Notifications Enabled"
+}
+
+);
+
+}
+
+});
+
+}
+
+}
+
+/* LIVE CLOCK */
+
+function updateClock(){
+
+let now = new Date();
+
+let time =
+now.toLocaleTimeString();
+
+document.getElementById("clock")
+.innerHTML = time;
+
+}
+
+setInterval(updateClock,1000);
+
+updateClock();
+
+/* LIVE NAMAZ STATUS */
+
+function updateNamazStatus(){
+
+let hour =
+new Date().getHours();
+
+let status = "";
+
+if(hour >= 5 && hour < 12){
+
+status =
+"🟢 Fajr Time Running";
+
+}
+else if(hour >= 12 && hour < 16){
+
+status =
+"🟢 Zohar Time Running";
+
+}
+else if(hour >= 16 && hour < 19){
+
+status =
+"🟢 Asar Time Running";
+
+}
+else if(hour >= 19 && hour < 21){
+
+status =
+"🟢 Maghrib Time Running";
+
+}
+else{
+
+status =
+"🟢 Isha Time Running";
+
+}
+
+document.getElementById("namazStatus")
+.innerHTML = status;
+
+}
+
+setInterval(updateNamazStatus,1000);
+
+updateNamazStatus();
+
+/* AZAN TIMES */
+
+let azanTimes = {
+
+fajr:"05:20",
+zohar:"13:30",
+asar:"17:30",
+maghrib:"19:05",
+isha:"21:00"
+
+};
+
+/* AZAN CHECK */
+
+function checkAzan(){
+
+let now = new Date();
+
+let hour =
+String(now.getHours())
+.padStart(2,"0");
+
+let minute =
+String(now.getMinutes())
+.padStart(2,"0");
+
+let currentTime =
+hour + ":" + minute;
+
+/* MATCH TIME */
+
+if(
+currentTime === azanTimes.fajr
+||
+currentTime === azanTimes.zohar
+||
+currentTime === azanTimes.asar
+||
+currentTime === azanTimes.maghrib
+||
+currentTime === azanTimes.isha
+){
+
+/* PLAY AZAN */
+
+document
+.getElementById("azanAudio")
+.play();
+
+/* POPUP */
+
+alert("🕌 Namaz Time Started");
+
+}
+
+}
+
+/* CHECK EVERY 30 SEC */
+
+setInterval(checkAzan,30000);
+
+/* MASJID DATA */
+
+let masjids = [
+
+{
+name:"Jama Masjid",
+area:"Joshi Peth, Jalgaon",
+
+fajr:"4:50 / 5:20",
+zohar:"1:00 / 1:30",
+asar:"5:15 / 5:30",
+maghrib:"7:05 / After Azaan",
+isha:"8:45 / 9:00",
+
+maps:"https://maps.app.goo.gl/77CiGDodzTiKNShD7?g_st=ac"
+},
+
+{
+name:"Osmaniya Masjid",
+area:"Salar Nagar, Jalgaon",
+
+fajr:"5:00 / 5:25",
+zohar:"1:05 / 1:35",
+asar:"5:20 / 5:40",
+maghrib:"7:08 / After Azaan",
+isha:"8:50 / 9:05",
+
+maps:"https://maps.google.com"
+},
+
+{
+name:"Madina Masjid",
+area:"Chahinagar, Jalgaon",
+
+fajr:"5:02 / 5:28",
+zohar:"1:07 / 1:37",
+asar:"5:22 / 5:42",
+maghrib:"7:09 / After Azaan",
+isha:"8:55 / 9:10",
+
+maps:"https://maps.google.com"
+}
+
+];
+
+/* LOAD MASJIDS */
+
+function loadMasjids(){
+
+let list =
+document.getElementById("list");
+
+list.innerHTML = "";
+
+masjids.forEach(function(m){
+
+list.innerHTML += `
+
+<div class="card">
+
+<h2>🕌 ${m.name}</h2>
+
+<p>📍 ${m.area}</p>
+
+<p>Fajr: ${m.fajr}</p>
+
+<p>Zohar: ${m.zohar}</p>
+
+<p>Asar: ${m.asar}</p>
+
+<p>Maghrib: ${m.maghrib}</p>
+
+<p>Isha: ${m.isha}</p>
+
+<a target="_blank"
+href="${m.maps}">
+📍 Open Map
+</a>
+
+</div>
+
+`;
+
+});
+
+}
+
+/* SEARCH */
+
+function searchMasjid(){
+
+let value =
+document.getElementById("search")
+.value
+.toLowerCase();
+
+let list =
+document.getElementById("list");
+
+list.innerHTML = "";
+
+let filtered =
+masjids.filter(function(m){
+
+return (
+m.name.toLowerCase().includes(value)
+||
+m.area.toLowerCase().includes(value)
+);
+
+});
+
+filtered.forEach(function(m){
+
+list.innerHTML += `
+
+<div class="card">
+
+<h2>🕌 ${m.name}</h2>
+
+<p>📍 ${m.area}</p>
+
+</div>
+
+`;
+
+});
+
+if(filtered.length === 0){
+
+list.innerHTML = `
+
+<div class="card">
+
+<h2>❌ No Masjid Found</h2>
+
+</div>
+
+`;
+
+}
+
+}
+
+</script>
+
+</body>
+
+</html>
